@@ -10,6 +10,15 @@ import (
 
 const dbPath string = "./hits.db"
 
+type Log struct {
+	Id        int
+	Path      string
+	UserAgent string
+}
+type Logs []Log
+
+type Paths []string
+
 func InitializeDb() {
 
 	os.Remove(dbPath)
@@ -55,4 +64,75 @@ func InsertPath(path string, userAgent string) {
 	}
 
 	tx.Commit()
+}
+
+func GetPathResults(path string) Logs {
+	var logs Logs
+
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query("select * from hits where path = ?", path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			id         int
+			path       string
+			user_agent string
+		)
+		err := rows.Scan(&id, &path, &user_agent)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		logs = append(logs, Log{id, path, user_agent})
+	}
+
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return logs
+}
+
+func GetUniquePathResults() Paths {
+	var paths Paths
+
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query("select distinct path from hits")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			path string
+		)
+		err := rows.Scan(&path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		paths = append(paths, path)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return paths
 }

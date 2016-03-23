@@ -1,0 +1,14 @@
+<html>
+  <head>
+    <title>Image Cache Home</title>
+  </head>
+
+  <body>
+    <h1>Image Cache Log</h1>
+    <ul>
+      {{range .}}
+      <li><a href="image/{{.}}/log">{{.}}</a></li>
+      {{end}}
+    </ul>
+  </body>
+</html>

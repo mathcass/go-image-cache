@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/base64"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -16,7 +17,19 @@ import (
 const base64GifPixel = "R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Logging request")
+	pathResults := db.GetUniquePathResults()
+
+	tpl := template.New("home.html")
+	tpl, err := tpl.ParseFiles("web/home.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = tpl.Execute(w, pathResults)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,11 +42,29 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, string(output))
 }
 
+func logHandler(w http.ResponseWriter, r *http.Request) {
+	path := mux.Vars(r)["path"]
+
+	logResults := db.GetPathResults(path)
+
+	tpl := template.New("log.html")
+	tpl, err := tpl.ParseFiles("web/log.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = tpl.Execute(w, logResults)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func Serve() {
 	log.Println("Starting go-image-cache webserver")
 	r := mux.NewRouter()
 	r.HandleFunc("/", homeHandler)
 	r.HandleFunc("/image/{path}", imageHandler)
+	r.HandleFunc("/image/{path}/log", logHandler)
 	// r.HandleFunc("/articles", ArticlesHandler)
 
 	// [START request_logging]
