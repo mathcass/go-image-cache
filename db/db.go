@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -11,14 +12,15 @@ import (
 const dbPath string = "./hits.db"
 
 type Log struct {
-	Id        int
-	Path      string
-	UserAgent string
+	Id         int
+	Path       string
+	InsertTime string
+	UserAgent  string
 }
 type Logs []Log
 
-type Path string
-type Paths []Path
+// For some reasoning, type aliasing string as Path breaks the database Scan
+type Paths []string
 
 func InitializeDb() {
 
@@ -31,7 +33,7 @@ func InitializeDb() {
 	defer db.Close()
 
 	sqlStmt := `
-  create table hits (id integer not null primary key, path text, user_agent text);
+  create table hits (id integer not null primary key, path text, time text, user_agent text);
 	`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -41,6 +43,7 @@ func InitializeDb() {
 }
 
 func InsertPath(path string, userAgent string) {
+	insertTime := time.Now().String() // Insert the current time
 
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -53,13 +56,13 @@ func InsertPath(path string, userAgent string) {
 		log.Fatal(err)
 	}
 
-	stmt, err := tx.Prepare("insert into hits(path, user_agent) values(?, ?)")
+	stmt, err := tx.Prepare("insert into hits(path, time, user_agent) values(?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(path, userAgent)
+	_, err = stmt.Exec(path, insertTime, userAgent)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,14 +89,15 @@ func GetPathResults(path string) Logs {
 		var (
 			id         int
 			path       string
-			user_agent string
+			insertTime string
+			userAgent  string
 		)
-		err := rows.Scan(&id, &path, &user_agent)
+		err := rows.Scan(&id, &path, &insertTime, &userAgent)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		logs = append(logs, Log{id, path, user_agent})
+		logs = append(logs, Log{id, path, insertTime, userAgent})
 	}
 
 	err = rows.Err()
@@ -121,7 +125,7 @@ func GetUniquePathResults() Paths {
 
 	for rows.Next() {
 		var (
-			path Path
+			path string
 		)
 		err := rows.Scan(&path)
 		if err != nil {
