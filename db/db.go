@@ -17,7 +17,8 @@ type Log struct {
 }
 type Logs []Log
 
-type Paths []string
+type Path string
+type Paths []Path
 
 func InitializeDb() {
 
@@ -120,7 +121,7 @@ func GetUniquePathResults() Paths {
 
 	for rows.Next() {
 		var (
-			path string
+			path Path
 		)
 		err := rows.Scan(&path)
 		if err != nil {

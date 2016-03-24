@@ -65,7 +65,6 @@ func Serve() {
 	r.HandleFunc("/", homeHandler)
 	r.HandleFunc("/image/{path}", imageHandler)
 	r.HandleFunc("/image/{path}/log", logHandler)
-	// r.HandleFunc("/articles", ArticlesHandler)
 
 	// [START request_logging]
 	// Delegate all of the HTTP routing and serving to the gorilla/mux router.
