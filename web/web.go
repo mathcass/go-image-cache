@@ -63,8 +63,8 @@ func Serve() {
 	log.Println("Starting go-image-cache webserver")
 	r := mux.NewRouter()
 	r.HandleFunc("/", homeHandler)
-	r.HandleFunc("/image/{path}", imageHandler)
-	r.HandleFunc("/image/{path}/log", logHandler)
+	r.HandleFunc("/{path}", imageHandler)
+	r.HandleFunc("/{path}/log", logHandler)
 
 	// [START request_logging]
 	// Delegate all of the HTTP routing and serving to the gorilla/mux router.
