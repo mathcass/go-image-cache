@@ -7,7 +7,7 @@ beacon that's usable on websites or emails. Heavily based on
 
 # Running
 
-Get the by running:
+Get by running:
 
 ```
 go get github.com/mathcass/go-image-cache
