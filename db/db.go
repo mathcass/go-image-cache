@@ -23,23 +23,33 @@ type Logs []Log
 type Paths []string
 
 func InitializeDb() {
+	if _, err := os.Stat(dbPath); err == nil {
+		// File exists but verify that we can open it properly
+		db, err := sql.Open("sqlite3", dbPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+		return
 
-	os.Remove(dbPath)
+	} else {
+		// File does not exist, create it and initialize db
+		db, err := sql.Open("sqlite3", dbPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
 
-	db, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	sqlStmt := `
+		sqlStmt := `
   create table hits (id integer not null primary key, path text, time text, user_agent text);
 	`
-	_, err = db.Exec(sqlStmt)
-	if err != nil {
-		log.Printf("%q: %s\n", err, sqlStmt)
-		return
+		_, err = db.Exec(sqlStmt)
+		if err != nil {
+			log.Printf("%q: %s\n", err, sqlStmt)
+			return
+		}
 	}
+
 }
 
 func InsertPath(path string, userAgent string) {
