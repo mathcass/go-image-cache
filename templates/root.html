@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Go Image Cache</title>
+    </head>
+    <body>
+        <h1>Go Image Cache</h1>
+        {{range .Requests }}
+        <p>
+            <a href="{{.Path}}/log"><b>{{.Path}}</b></a> accessed on <em>{{.Date.Format "3:04pm, Mon 2 Jan"}}</em> via <blockquote>{{.UserAgent}}</blockquote>
+        </p>
+        {{end}}
+    </body>
+</html>
